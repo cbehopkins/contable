@@ -1,4 +1,5 @@
-baseURL = "http://https://www.contable.co.uk/"
-languageCode = "en-uk"
+baseURL = "http://www.contable.co.uk/"
+languageCode = "en-us"
 title = "Cbehopkins' Experiments"
 theme = "anank"
+

@@ -5,3 +5,6 @@ draft: false
 ---
 # Introduction
 This is going to be used for me to try out a few things
+
+To ru the server:
+hugo server -D --disableFastRender --bind 0.0.0.0 --baseURL http://192.168.xx.xx:1313
