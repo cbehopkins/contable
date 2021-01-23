@@ -1,7 +1,7 @@
 ---
-title: "My First Post"
+title: "Test Post"
 date: 2021-01-23T12:14:08Z
 draft: false
 ---
 # Introduction
-Here is a website that is starting
+This is going to be used for me to try out a few things
