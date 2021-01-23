@@ -10,4 +10,4 @@ To run the server:
 hugo server -D --disableFastRender --bind 0.0.0.0 --baseURL http://192.168.xx.xx:1313
 
 
-Here is a link [bang](/table.html) 
+Here is a link [bang](/bob.html) 
