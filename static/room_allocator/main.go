@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/cbehopkins/room_allocation"
 	"strconv"
 	"strings"
 	"syscall/js"
+
+	"github.com/cbehopkins/room_allocation"
 )
 
 func calculate(this js.Value, i []js.Value) interface{} {
@@ -38,7 +40,13 @@ func calculate(this js.Value, i []js.Value) interface{} {
 		setOutput("Unexpected Errpr")
 		return nil
 	}
-	setOutput(roomsSchedule.String())
+	//setOutput(roomsSchedule.String())
+	v, err := json.Marshal(roomsSchedule)
+	if err != nil {
+		fmt.Println("Error marshalling the structure", err)
+		return nil
+	}
+	setOutput(string(v))
 	//t.Println(peeps.ListConnections())
 
 	return nil

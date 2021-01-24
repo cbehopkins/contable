@@ -1,50 +1,77 @@
 <!DOCTYPE html>
-<!--
-Copyright 2018 The Go Authors. All rights reserved.
-Use of this source code is governed by a BSD-style
-license that can be found in the LICENSE file.
--->
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Go wasm</title>
-  </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col s12">
+                <div id="main" class="card">
+                    <div class="card-content">
+                        <span class="card-title">Room Count</span>
+                        <div class="row">
+                            <form id="room-form">
+                                <div class="input-field col s12">
+                                    <input type="text" name="roomCount" id="RoomCount" value="2">
+                                    <label for="roomCount">Set Number of Meeting Rooms</label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <h5 id="task-title">People</h5>
+                        <div class="row">
 
-  <body>
+                                <div class="input-field col s12">
+                                    <textarea id="InputText" class="materialize-textarea"></textarea>
+                                    <label for="InputText">Enter the people you want to meet - one per line</label>
+                                </div>
+
+                                <a href="#" class="display-results btn black" >Calculate</a>
+                                <textarea id="result" style="display:none;"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <h5 id="task-title">Results</h5>
+                        <div class="row">
+                                <a href="#" class="next_page btn black" >Next Meeting</a>
+<p id="room_display">  </p>
+                                <table class="collection"> </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="wasm_exec.js"></script>
-
     <script>
-      if (!WebAssembly.instantiateStreaming) {
-        // polyfill
-        WebAssembly.instantiateStreaming = async (resp, importObject) => {
-          const source = await (await resp).arrayBuffer();
-          return await WebAssembly.instantiate(source, importObject);
-        };
-      }
-      const go = new Go();
-      let mod, inst;
-      WebAssembly.instantiateStreaming(fetch("room_allocator.wasm"), go.importObject).then(
-        async result => {
-          mod = result.module;
-          inst = result.instance;
-          await go.run(inst);
+        if (!WebAssembly.instantiateStreaming) {
+          // polyfill
+          WebAssembly.instantiateStreaming = async (resp, importObject) => {
+            const source = await (await resp).arrayBuffer();
+            return await WebAssembly.instantiate(source, importObject);
+          };
         }
-      );
+        const go = new Go();
+        let mod, inst;
+        WebAssembly.instantiateStreaming(fetch("room_allocator.wasm"), go.importObject).then(
+          async result => {
+            mod = result.module;
+            inst = result.instance;
+            await go.run(inst);
+          }
+        );
     </script>
-    <table>
-	<tr>
-		<td>Room Count</td><td><input type="text" id="RoomCount" >2</input></td>
-	</tr>
-	<tr>
-		<td>Input People</td><td><textarea id="InputText" rows="10" cols="30">Please enter at least 4 people's names here</textarea></td>
-	</tr>
-	</table>
 
-    <button onClick="calculate('RoomCount', 'InputText', 'result');" id="calculate">
-      Calculate
-    </button>
+    <script src="app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-    <textarea id="result" rows="20" cols="30"></textarea>
-<br/>
- </body>
+</body>
 </html>
