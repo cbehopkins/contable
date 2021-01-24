@@ -12,7 +12,7 @@ To run the server:
 
 
 Here is a little calculator test app I stole from [here](https://tutorialedge.net/golang/go-webassembly-tutorial/) [calculator](/calculator.html) 
-I am working on a room allocator tool - [Here](/tables.html)
+I am working on a room allocator tool - [Here](/room_allocator.html)
 To build this:
 
 `cd static
