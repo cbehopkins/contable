@@ -1,5 +1,6 @@
 const form = document.querySelector('#room-form');
 const roomResultList = document.querySelector('.collection');
+const connectionResultList = document.querySelector('.connections');
 const displayBtn = document.querySelector('.display-results');
 const nextPageBtn = document.querySelector('.next_page');
 //# says ID of
@@ -34,13 +35,19 @@ const srcJsonHard = `[
 let disCount = 0;
 let numMeetings = 0;
 let useWasm = true;
-
+let resultsDict;
 function displayResults(e){
     if (useWasm) {
-        calculate('RoomCount', 'InputText', 'result');
+	let meetCnt = 1;
+	let optLevel = 10;
+        resultsDict = calculate('RoomCount', 'InputText', meetCnt, optLevel);
+	if (resultsDict["err"] == "") {
+		alert(resultsDict["err"]);
+	}
     }
     disCount = 0;
     populateRoomDisplay();
+    e.preventDefault();
 }
 function nextPage(e){
     console.log(disCount);
@@ -49,36 +56,49 @@ function nextPage(e){
         disCount = 0;
     }
     populateRoomDisplay();
+    e.preventDefault();
 }
 
 function renderPeople(people) {
-    roomText = ""
-    let spacer = ""
-    for (let i=0; i<people.length; i++){
-        roomText += spacer + people[i].Name;
-        spacer = "\n";
-    }
-    return roomText;
+    // Map an array of the people object
+    // into a presentable list for the gui
+    return people.map(x => x.Name).join("\n");
+}
+function extractBrackets(item) {
+	// Take "[Bob:1, Fred:2]"
+	// Return an array:["Bob:1", "Fred:2"]
+	item = item.substr(0, item.length-1).substr(1)
+	return item.replaceAll(", ", "\n")
 }
 
-function populateRoomDisplay(){
-    
+function formatConnections(){
+	let connectionString = resultsDict["connections"].substr(2);
+    	connectionString = connectionString.substr(0, connectionString.length-1);
+	tmp = connectionString.split("\n");
+	categor = tmp.map(x => x.split(" is connected to:"));
+	categor = categor.map(x => [x[0], extractBrackets(x[1])]);
+    createResultsTable(connectionResultList, categor);
+    populateResultsTable(connectionResultList, categor);
 
-    let srcJson = document.querySelector("#result").value;
+}
+function populateRoomDisplay(){
+    let srcJson = resultsDict["meetings"];
     if (!useWasm) {
         srcJson = srcJsonHard;
     }
-    //console.log(`Got ${srcJson}`)
+    console.log(`Got ${srcJson}`)
     if (srcJson == "") {
         return;
     }
-    // srcJson = srcJsonHard;
     let resultObj = JSON.parse(srcJson);
     numMeetings = resultObj.length;
     document.getElementById("room_display").textContent = `Meeting Number: ${disCount + 1} of ${numMeetings}`
-    let resTab = generateRoomMappingFromInput(resultObj)
-    createDisplayTable(resTab);
-    populateResultsTable(resTab);
+
+    
+    let resTab = generateRoomMappingFromInput(resultObj);
+	 formatConnections();
+    createResultsTable(roomResultList, resTab);
+    populateResultsTable(roomResultList, resTab);
 
 }
 
@@ -135,8 +155,8 @@ function autoResize(th){
     th.style.height = 'auto';
     th.style.height = (th.scrollHeight) + 'px';
 }
-function populateResultsTable(inputArray) {
-    let selectedRow = roomResultList.firstElementChild;
+function populateResultsTable(element, inputArray) {
+    let selectedRow = element.firstElementChild;
     for (let i=0; i<inputArray.length; i++) {
         populateResultsRow(selectedRow, inputArray[i]);
         selectedRow = selectedRow.nextElementSibling;
@@ -150,17 +170,17 @@ function populateResultsRow(selectedRow, inputArray) {
         selectedElement = selectedElement.nextElementSibling
     }
 }
-function createDisplayTable(resTab){
-    while(roomResultList.firstChild) {
-        roomResultList.removeChild(roomResultList.firstChild);
+function createResultsTable(element, resTab){
+    while(element.firstChild) {
+        element.removeChild(element.firstChild);
     }
     for (i=0; i< resTab.length; i++){
-        addRoomDisplay(resTab[i]);
+        addRoomDisplay(element, resTab[i]);
     }
 }
-function addRoomDisplay(item) {
+function addRoomDisplay(element, item) {
     let rw = createColumns(item.length);
-    roomResultList.appendChild(rw);
+    element.appendChild(rw);
 }
 function createColumns(cnt){
     const rw = document.createElement('tr');
