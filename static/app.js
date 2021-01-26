@@ -62,7 +62,7 @@ function populateRoomDisplay(){
     if (srcJson == "") {
         return;
     }
-    srcJson = srcJsonHard;
+    // srcJson = srcJsonHard;
     let resultObj = JSON.parse(srcJson);
     numMeetings = resultObj.length;
     let resTab = generateRoomMappingFromInput(resultObj)
