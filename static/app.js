@@ -14,8 +14,21 @@ function loadEventListeners(){
     nextPageBtn.addEventListener('click', nextPage);
 }
 
+// Here there are 4 people in 2 rooms
+// which takes 3 meetings for them all to see each other
 const srcJsonHard = `[
-    [{"People":[{"Name":"bob","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"}]},{"Name":"this","Connections":[{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]},{"People":[{"Name":"other","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"bob"}]},{"Name":"that","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]}],[{"People":[{"Name":"bob","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"}]},{"Name":"that","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]},{"People":[{"Name":"this","Connections":[{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]},{"Name":"other","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"bob"}]}]}],[{"People":[{"Name":"bob","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"}]},{"Name":"other","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"bob"}]}]},{"People":[{"Name":"this","Connections":[{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]},{"Name":"that","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]}]
+    [{"People":[{"Name":"bob","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"}]},
+                {"Name":"this","Connections":[{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]},
+     {"People":[{"Name":"other","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"bob"}]},
+                {"Name":"that","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]}],
+    [{"People":[{"Name":"bob","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"}]},
+                {"Name":"that","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]},
+     {"People":[{"Name":"this","Connections":[{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]},
+                {"Name":"other","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"bob"}]}]}],
+    [{"People":[{"Name":"bob","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"}]},
+                {"Name":"other","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"bob"}]}]},
+     {"People":[{"Name":"this","Connections":[{"Count":1,"PerLink":"that"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]},
+                {"Name":"that","Connections":[{"Count":1,"PerLink":"this"},{"Count":1,"PerLink":"other"},{"Count":1,"PerLink":"bob"}]}]}]
 ]
 `
 let disCount = 0;
@@ -27,8 +40,6 @@ function displayResults(e){
         calculate('RoomCount', 'InputText', 'result');
     }
     disCount = 0;
-
-
     populateRoomDisplay();
 }
 function nextPage(e){
@@ -37,7 +48,6 @@ function nextPage(e){
     if (disCount >= (numMeetings-1)) {
         disCount = 0;
     }
-    console.log(disCount);
     populateRoomDisplay();
 }
 
@@ -52,7 +62,7 @@ function renderPeople(people) {
 }
 
 function populateRoomDisplay(){
-    document.getElementById("room_display").textContent = `Meeting Number: ${disCount + 1}`
+    
 
     let srcJson = document.querySelector("#result").value;
     if (!useWasm) {
@@ -65,6 +75,7 @@ function populateRoomDisplay(){
     // srcJson = srcJsonHard;
     let resultObj = JSON.parse(srcJson);
     numMeetings = resultObj.length;
+    document.getElementById("room_display").textContent = `Meeting Number: ${disCount + 1} of ${numMeetings}`
     let resTab = generateRoomMappingFromInput(resultObj)
     createDisplayTable(resTab);
     populateResultsTable(resTab);
@@ -102,7 +113,7 @@ function determineMovement(first, last){
                 // Don't print anything if we stay in the same place
                 continue;
             }
-            text += split + `${first_column_split[i][j]} => ${mapping[i][j]}`;
+            text += split + `${first_column_split[i][j]} => ${mapping[i][j] + 1}`;
             split = "\n";
         }
         resultA.push(text);
