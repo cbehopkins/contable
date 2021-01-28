@@ -96,7 +96,7 @@ function populateRoomDisplay(){
 
     
     let resTab = generateRoomMappingFromInput(resultObj);
-	 formatConnections();
+	formatConnections();
     createResultsTable(roomResultList, resTab);
     populateResultsTable(roomResultList, resTab);
 
