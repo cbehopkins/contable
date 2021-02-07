@@ -31,22 +31,58 @@
                                 <a href="#" id="anagram-btn" class="display-anagram-results btn black" >Calculate</a>
                             </div>
                         </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="row" id="result-row" style="display:none;">
+        <div class="row" id="countdown-input" style="display:none;">
+          <div class="col s12">
+              <div id="main" class="card">
+                  <div class="card-content">
+                      <h5 id="task-title">Countdown</h5>
+                      <div class="row">
+                          <div class="input-field col s12">
+                              <table  id="countdown-get-it-here"></table>
+                          </div>
+                          <div>
+                              <label for="countdown-target-input">What's the target?</label>
+                              <input type="number"  id="countdown-target-input">
+                              <a href="#" id="countdown-btn" class="display-countdown-results btn black" >Calculate</a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </div>
+      <div class="row" id="sudoku-input" style="display:none;">
+        <div class="col s12">
+            <div id="main" class="card">
+                <div class="card-content">
+                    <h5 id="task-title">Sudoku</h5>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <table id="sudoku-get-it-here"></table>
+                            <a href="#" id="sudoku-btn" class="display-sudoku-results btn black" >Calculate</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="row" id="result-row" style="display:none;">
             <div class="col s12">
                 <div id="main" class="card">
                     <div class="card-content">
                         <h5 id="task-title">Results</h5>
                         <div class="row">
-                                <table id="results" class="collection">
+                            <table id="results" class="collection">
 
-                                </table>
+                            </table>
                         </div>
+                    </div>
                 </div>
             </div>
-        </div>
+      </div>
     </div>
     
     <script src="wasm_exec.js"></script>
