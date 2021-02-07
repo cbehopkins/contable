@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper">
+          <a href="" class="brand-logo">Puzzles</a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="#" id="select_anagram">anagram</a></li>
+            <li><a href="#" id="select_countdown">countdown</a></li>
+            <li><a href="#" id="select_sudoku">sudoku</a></li>
+          </ul>
+        </div>
+      </nav>
+    <div class="container">
+        <div class="row" id="anagram-input" style="display:none;">
+            <div class="col s12">
+                <div id="main" class="card">
+                    <div class="card-content">
+                        <h5 id="task-title">Anagram</h5>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input type="text"  id="anagram-get-it-here">
+                                <label for="anagram-get-it-here">Input (a series of) Words</label>
+                                <a href="#" id="anagram-btn" class="display-anagram-results btn black" >Calculate</a>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="result-row" style="display:none;">
+            <div class="col s12">
+                <div id="main" class="card">
+                    <div class="card-content">
+                        <h5 id="task-title">Results</h5>
+                        <div class="row">
+                                <table id="results" class="collection">
+
+                                </table>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="wasm_exec.js"></script>
+    <script>
+        if (!WebAssembly.instantiateStreaming) {
+          // polyfill
+          WebAssembly.instantiateStreaming = async (resp, importObject) => {
+            const source = await (await resp).arrayBuffer();
+            return await WebAssembly.instantiate(source, importObject);
+          };
+        }
+        const go = new Go();
+        let mod, inst;
+        WebAssembly.instantiateStreaming(fetch("puzzle.wasm"), go.importObject).then(
+          async result => {
+            mod = result.module;
+            inst = result.instance;
+            await go.run(inst);
+          }
+        );
+    </script>
+
+    <script src="puzzle.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+</body>
+</html>
