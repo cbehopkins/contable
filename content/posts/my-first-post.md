@@ -20,9 +20,13 @@ To build this:
 cd static
 
 GOARCH=wasm GOOS=js go build -o calculator.wasm calculator/main.go
+GOARCH=wasm GOOS=js go build -o puzzle.wasm puzzle/main.go
 `
 
 I am working on a room allocator tool - [Here](/room_allocator.html)
+
+And - [Here](/puzzle.html) is a puzzle solvig website I'm developing. Uses JS for the UI, with GO WASM for the calculations.
+
 
 Look! You can use colons to say where to align, including centring it.
 
