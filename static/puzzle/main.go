@@ -149,10 +149,16 @@ func sudoku(this js.Value, i []js.Value) interface{} {
 		return map[string]interface{}{
 			"error": fmt.Sprint("Error len of input wrong", len(i))}
 	}
+	// TBD rip this out into a test function
 	//jsonStr := `[["","","","2","6","","7","",""],["6","8","","","7","","","9",""],["1","9","","","","4","5","",""],["8","2","","1","","","","4",""],["","","4","6","","2","9","",""],["","5","","","","3","","2","8"],["","","9","3","","","","7","4"],["","4","","","5","","","3","6"],["7","","3","","1","8","","",""]]`
 	ra, err := jsonTo2dArrayInt(i[0].String())
 	// fmt.Println("We have our array now:", ra)
-	returnArray := runSudoku(ra)
+	returnArray, err := runSudoku(ra)
+	if err != nil {
+		return map[string]interface{}{
+			"error": err,
+		}
+	}
 	tmp, err := json.Marshal(returnArray)
 	return map[string]interface{}{
 		"error":  err,
@@ -160,7 +166,7 @@ func sudoku(this js.Value, i []js.Value) interface{} {
 	}
 }
 
-func runSudoku(input [][]int) (output [][]int) {
+func runSudoku(input [][]int) (output [][]int, err error) {
 	var testPuzzle *sod.Puzzle
 	size := len(input)
 	output = make([][]int, size)
@@ -183,14 +189,16 @@ func runSudoku(input [][]int) (output [][]int) {
 			}
 		}
 	}
-	result := testPuzzle.SelfCheck()
-	if result != nil {
-		// TBD add error field we can report this to
+	err = testPuzzle.SelfCheck()
+	if err != nil {
 		return
 	}
 	testPuzzle.SolveAll()
 
-	result = testPuzzle.SelfCheck()
+	err = testPuzzle.SelfCheck()
+	if err != nil {
+		return
+	}
 	for x := 0; x < size; x++ {
 		for y := 0; y < size; y++ {
 			vals := testPuzzle.GetCel(sod.Coord{x, y}).Values()
@@ -208,7 +216,6 @@ func registerCallbacks() {
 	js.Global().Set("anagram", js.FuncOf(anagram))
 	js.Global().Set("countdown", js.FuncOf(countdown))
 	js.Global().Set("sudoku", js.FuncOf(sudoku))
-
 }
 
 func main() {

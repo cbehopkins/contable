@@ -20,6 +20,8 @@ const sudokuTable = document.getElementById("sudoku-get-it-here");
 const resultRow = document.getElementById("result-row");
 loadEventListeners();
 
+
+
 function loadEventListeners(){
     selectAnagramMenu.addEventListener('click', selectAnagram);
     selectCountdownMenu.addEventListener('click', selectCountdown);
@@ -81,10 +83,11 @@ function calculateCountdown(e){
 
     // We want the first (and only) row of the table
     countdownBtn.text = "Calculating..."
+    let countdownPromise = runCountdownCalc();
     setTimeout(() =>{
-        runCountdownCalc().then(console.log)
+        countdownPromise.then(console.log)
         countdownBtn.text = "Calculated"
-    }, 100);
+    }, 500);
 
     e.preventDefault();
 }
