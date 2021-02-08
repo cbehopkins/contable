@@ -77,9 +77,20 @@ function calculateAnagram(e){
 function calculateCountdown(e){
     // The first input number is always the target
     // let testInput = ["4", "5", "10", "100", "50", "1"]
-    let inputTable = inputTableRetrieve(countdownTable); 
+
 
     // We want the first (and only) row of the table
+    countdownBtn.text = "Calculating..."
+    setTimeout(() =>{
+        runCountdownCalc().then(console.log)
+        countdownBtn.text = "Calculated"
+    }, 100);
+
+    e.preventDefault();
+}
+
+async function runCountdownCalc(){
+    let inputTable = inputTableRetrieve(countdownTable); 
     returnStruct = countdown(countdownTarget.value, JSON.stringify(inputTable[0]));
     console.log(returnStruct)
     if (returnStruct["error"] != "") {
@@ -88,19 +99,22 @@ function calculateCountdown(e){
     }
     let rs = returnStruct["countdown"]
     console.log(`Result:${rs}`)
-    // resultArray = rePopulate(returnStruct["countdown"], 3);
-    // populateTab(roomResultList, resultArray);
-    e.preventDefault();
+
+    populateTab(roomResultList, [[rs]]);
 }
+
 function calculateSudoku(e){
     inputTable = inputTableRetrieve(sudokuTable);
-    returnStruct = sudoku(inputTable);
+    inputTableJson = JSON.stringify(inputTable);
+    // inputTableJson = `[["","","","2","6","","7","",""],["6","8","","","7","","","9",""],["1","9","","","","4","5","",""],["8","2","","1","","","","4",""],["","","4","6","","2","9","",""],["","5","","","","3","","2","8"],["","","9","3","","","","7","4"],["","4","","","5","","","3","6"],["7","","3","","1","8","","",""]]`
+    // console.log(`Table:::${inputTable}`);
+    returnStruct = sudoku(inputTableJson);
     console.log(returnStruct)
-    if (returnStruct["error"] != "") {
-        console.log(`Got an error ${returnStruct["err"]}`)
+    if (returnStruct["error"] != null) {
+        console.log(`Got an error ${returnStruct["error"]}`)
         return;
     }
-    resultArray = rePopulate(JSON.parse(returnStruct["sudoku"]), 3);
+    resultArray = JSON.parse(returnStruct["sudoku"]);
     populateTab(roomResultList, resultArray);
     e.preventDefault();
 }
