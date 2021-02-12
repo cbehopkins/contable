@@ -20,8 +20,6 @@ const sudokuTable = document.getElementById("sudoku-get-it-here");
 const resultRow = document.getElementById("result-row");
 loadEventListeners();
 
-
-
 function loadEventListeners(){
     selectAnagramMenu.addEventListener('click', selectAnagram);
     selectCountdownMenu.addEventListener('click', selectCountdown);

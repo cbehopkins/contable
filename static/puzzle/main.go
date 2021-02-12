@@ -7,7 +7,7 @@ import (
 	"syscall/js"
 
 	"github.com/cbehopkins/ana"
-	cntSlv "github.com/cbehopkins/countdown/cnt_slv"
+	cntslv "github.com/cbehopkins/countdown/cnt_slv"
 	"github.com/cbehopkins/sod"
 	"github.com/cbehopkins/wordlist"
 )
@@ -91,10 +91,10 @@ func jsonTo2dArrayInt(inputText string) (retArray [][]int, err error) {
 	return retArray, nil
 }
 func runCountdown(target int, sources []int) string {
-	foundValues := cntSlv.NewNumMap()
-	//found_values.SelfTest = true
+	foundValues := cntslv.NewNumMap()
+	foundValues.SelfTest = false
 	foundValues.UseMult = true
-	foundValues.PermuteMode = cntSlv.FastMap
+	foundValues.PermuteMode = cntslv.LonMap
 	foundValues.SeekShort = false // TBD make this controllable
 
 	fmt.Println("Starting permute")
