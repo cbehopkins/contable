@@ -2,11 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
+	"sort"
 	"strconv"
 	"syscall/js"
 
 	"github.com/cbehopkins/ana"
+	"github.com/cbehopkins/boggle"
+
 	cntslv "github.com/cbehopkins/countdown/cnt_slv"
 	"github.com/cbehopkins/sod"
 	"github.com/cbehopkins/wordlist"
@@ -212,8 +217,94 @@ func runSudoku(input [][]int) (output [][]int, err error) {
 	}
 	return
 }
+
+type byLength []string
+
+func (s byLength) Len() int {
+	return len(s)
+}
+func (s byLength) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s byLength) Less(i, j int) bool {
+	return len(s[i]) < len(s[j])
+}
+
+func toBoggleArray(i js.Value) ([][]rune, error) {
+	var inputValues [][]string
+	err := json.Unmarshal([]byte(i.String()), &inputValues)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range inputValues {
+		if len(v) != len(inputValues) {
+			return nil, errors.New("Input array was not square")
+		}
+	}
+	ra := make([][]rune, len(inputValues))
+	for i, v := range inputValues {
+		ra[i] = make([]rune, len(inputValues))
+		for j, w := range v {
+			raa := []rune(w)
+			if len(raa) != 1 {
+				fmt.Println("Length of rune was not 1, on ", i, ",", j)
+			}
+			ra[i][j] = raa[0]
+		}
+	}
+	return ra, nil
+}
+
+func boggleRun(this js.Value, i []js.Value) interface{} {
+	data, err := wordlist.Asset("data/wordlist.txt")
+	if err != nil {
+		return map[string]interface{}{
+			"error": err,
+		}
+	}
+	ra, err := toBoggleArray(i[0])
+	if err != nil {
+		return map[string]interface{}{
+			"error": err,
+		}
+	}
+
+	dic := boggle.NewDictMap([]string{})
+	dic.PopulateFromBa(data)
+
+	wrdsFound := make(map[string]struct{})
+	pz := dic.NewPuzzle(4, ra)
+	wrkFunc := func(wrd string) {
+		wrdsFound[wrd] = struct{}{}
+	}
+
+	pz.StartWorker(wrkFunc)
+	pz.RunWalk()
+	pz.Shutdown()
+	wrdCnt := len(wrdsFound)
+	log.Println("Word Count:", wrdCnt)
+	sortedResult := make([]string, wrdCnt)
+	j := 0
+	for wrd := range wrdsFound {
+		sortedResult[j] = wrd
+		j++
+	}
+	sort.Sort(sort.Reverse(byLength(sortedResult)))
+	log.Println(sortedResult)
+	tmp, err := json.Marshal(sortedResult)
+	if err != nil {
+		return map[string]interface{}{
+			"error": err,
+		}
+	}
+	return map[string]interface{}{
+		"error":  err,
+		"boggle": string(tmp),
+	}
+}
 func registerCallbacks() {
 	js.Global().Set("anagram", js.FuncOf(anagram))
+	js.Global().Set("boggleRun", js.FuncOf(boggleRun))
 	js.Global().Set("countdown", js.FuncOf(countdown))
 	js.Global().Set("sudoku", js.FuncOf(sudoku))
 }

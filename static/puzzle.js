@@ -1,4 +1,5 @@
 const selectAnagramMenu = document.getElementById("select_anagram");
+const selectBoggleMenu = document.getElementById("select_boggle");
 const selectCountdownMenu = document.getElementById("select_countdown");
 const selectSudokuMenu = document.getElementById("select_sudoku");
 
@@ -7,6 +8,11 @@ const roomResultList = document.getElementById("results");
 const anagramRow = document.getElementById("anagram-input");
 const anagramBtn = document.getElementById("anagram-btn");
 const anagramInput = document.getElementById("anagram-get-it-here");
+
+const boggleRow = document.getElementById("boggle-input");
+const boggleBtn = document.getElementById("boggle-btn");
+const boggleTable = document.getElementById("boggle-get-it-here");
+const boggleTarget = document.getElementById('boggle-target-input');
 
 const countdownRow = document.getElementById("countdown-input");
 const countdownBtn = document.getElementById("countdown-btn");
@@ -22,16 +28,18 @@ loadEventListeners();
 
 function loadEventListeners(){
     selectAnagramMenu.addEventListener('click', selectAnagram);
+    selectBoggleMenu.addEventListener('click', selectBoggle);
     selectCountdownMenu.addEventListener('click', selectCountdown);
     selectSudokuMenu.addEventListener('click', selectSudoku);
 
     anagramBtn.addEventListener('click', calculateAnagram);
+    boggleBtn.addEventListener('click', calculateBoggle);
     countdownBtn.addEventListener('click', calculateCountdown);
     sudokuBtn.addEventListener('click', calculateSudoku);
 
 }
 function hideAllViews(){
-    [resultRow, anagramRow, countdownRow, sudokuRow].forEach(x => x.style="display:none");
+    [resultRow, anagramRow, boggleRow, countdownRow, sudokuRow].forEach(x => x.style="display:none");
 }
 
 ///////////////////////////////////////
@@ -45,6 +53,13 @@ function selectAnagram (e) {
     e.preventDefault();
 }
 
+function selectBoggle (e) {
+    hideAllViews()
+    console.log("Select boggle");
+    inputTablePopulate(boggleTable, 4, 4, "boggle", "text")
+    boggleRow.style= ""; // Display the page
+    e.preventDefault();
+}
 function selectCountdown (e) {
     hideAllViews()
     console.log("Select the countdown");
@@ -110,7 +125,7 @@ function calculateSudoku(e){
     // inputTableJson = `[["","","","2","6","","7","",""],["6","8","","","7","","","9",""],["1","9","","","","4","5","",""],["8","2","","1","","","","4",""],["","","4","6","","2","9","",""],["","5","","","","3","","2","8"],["","","9","3","","","","7","4"],["","4","","","5","","","3","6"],["7","","3","","1","8","","",""]]`
     // console.log(`Table:::${inputTable}`);
     returnStruct = sudoku(inputTableJson);
-    console.log(returnStruct)
+    console.log(returnStruct);
     if (returnStruct["error"] != null) {
         console.log(`Got an error ${returnStruct["error"]}`)
         return;
@@ -118,6 +133,26 @@ function calculateSudoku(e){
     resultArray = JSON.parse(returnStruct["sudoku"]);
     populateTab(roomResultList, resultArray);
     e.preventDefault();
+}
+
+function calculateBoggle(e) {
+    inputTable = inputTableRetrieve(boggleTable)
+    // inputTable = [
+    //     ["a", "b", "d", "e"],
+    //     ["b", "b", "g", "b"],
+    //     ["c", "f", "d", "a"],
+    //     ["a", "d", "w", "e"],
+    // ];
+    inputTableJson = JSON.stringify(inputTable);
+    returnStruct = boggleRun(inputTableJson);
+    if (returnStruct["error"] != null) {
+        console.log(`Got an error ${returnStruct["error"]}`)
+        return;
+    }
+    resultArray = rePopulate(JSON.parse(returnStruct["boggle"]), 5);
+    populateTab(roomResultList, resultArray);
+    e.preventDefault();
+
 }
 ///////////////////////////////////////
 // The generate table population functions
