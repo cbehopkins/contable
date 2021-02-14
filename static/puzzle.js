@@ -97,24 +97,24 @@ function calculateCountdown(e){
     // We want the first (and only) row of the table
     countdownBtn.text = "Calculating..."
     let countdownPromise = runCountdownCalc();
+    countdownBtn.text = "Calculated"
+
     setTimeout(() =>{
-        countdownPromise.then(console.log)
-        countdownBtn.text = "Calculated"
-    }, 500);
+        countdownBtn.text = "Calculate"
+    }, 5000);
 
     e.preventDefault();
 }
 
 async function runCountdownCalc(){
     let inputTable = inputTableRetrieve(countdownTable); 
-    returnStruct = countdown(countdownTarget.value, JSON.stringify(inputTable[0]));
-    console.log(returnStruct)
-    if (returnStruct["error"] != "") {
-        console.log(`Got an error ${returnStruct["err"]}`)
-        return;
+    try{
+        returnStruct = await countdownPromise(countdownTarget.value, JSON.stringify(inputTable[0]));
+    } catch (err) {
+        console.error('Caught exception', err)
+        return
     }
     let rs = returnStruct["countdown"]
-    console.log(`Result:${rs}`)
 
     populateTab(roomResultList, [[rs]]);
 }
@@ -137,22 +137,27 @@ function calculateSudoku(e){
 
 function calculateBoggle(e) {
     inputTable = inputTableRetrieve(boggleTable)
-    // inputTable = [
-    //     ["a", "b", "d", "e"],
-    //     ["b", "b", "g", "b"],
-    //     ["c", "f", "d", "a"],
-    //     ["a", "d", "w", "e"],
-    // ];
+    inputTable = [
+        ["a", "b", "d", "e"],
+        ["b", "b", "g", "b"],
+        ["c", "f", "d", "a"],
+        ["a", "d", "w", "e"],
+    ];
     inputTableJson = JSON.stringify(inputTable);
-    returnStruct = boggleRun(inputTableJson);
-    if (returnStruct["error"] != null) {
-        console.log(`Got an error ${returnStruct["error"]}`)
-        return;
-    }
-    resultArray = rePopulate(JSON.parse(returnStruct["boggle"]), 5);
-    populateTab(roomResultList, resultArray);
+    calculateBoggleRunner(inputTableJson)
     e.preventDefault();
 
+}
+async function calculateBoggleRunner(inputTableJson) {
+    try {
+        returnStruct = await bogglePromise(inputTableJson);
+    } catch (err) {
+        console.error('Caught exception', err)
+        return
+    }
+
+    resultArray = rePopulate(JSON.parse(returnStruct["boggle"]), 5);
+    populateTab(roomResultList, resultArray);
 }
 ///////////////////////////////////////
 // The generate table population functions

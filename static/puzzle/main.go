@@ -230,9 +230,10 @@ func (s byLength) Less(i, j int) bool {
 	return len(s[i]) < len(s[j])
 }
 
-func toBoggleArray(i js.Value) ([][]rune, error) {
+// FIXME rename i
+func toBoggleArray(i string) ([][]rune, error) {
 	var inputValues [][]string
-	err := json.Unmarshal([]byte(i.String()), &inputValues)
+	err := json.Unmarshal([]byte(i), &inputValues)
 	if err != nil {
 		return nil, err
 	}
@@ -255,18 +256,101 @@ func toBoggleArray(i js.Value) ([][]rune, error) {
 	return ra, nil
 }
 
+func bogglePromise(this js.Value, argsOuter []js.Value) interface{} {
+	// Handler for the Promise
+	handler := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		resolve := args[0]
+		reject := args[1]
+
+		// Run this code asynchronously
+		go func(ip string) {
+			res, err := boggleRunner(ip)
+			if err == nil {
+				resolve.Invoke(map[string]interface{}{
+					"boggle": res,
+					"error":  err,
+				})
+			} else {
+				// Create a JS Error object and pass it to the reject function
+				// The constructor for Error accepts a string,
+				// so we need to get the error message as string from "err"
+				errorConstructor := js.Global().Get("Error")
+				errorObject := errorConstructor.New(err.Error())
+				reject.Invoke(errorObject)
+			}
+		}(argsOuter[0].String())
+
+		// The handler of a Promise doesn't return any value
+		return nil
+	})
+
+	// Create and return the Promise object
+	promiseConstructor := js.Global().Get("Promise")
+	return promiseConstructor.New(handler)
+}
+
+func countdownPromise(this js.Value, argsOuter []js.Value) interface{} {
+	targetS := argsOuter[0].String()
+	inputS := argsOuter[1].String()
+	// Handler for the Promise
+	handler := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		resolve := args[0]
+		reject := args[1]
+
+		// Run this code asynchronously
+		go func(targetS, inputsS string) {
+			errorConstructor := js.Global().Get("Error")
+
+			target, err := strconv.Atoi(targetS)
+			if err != nil {
+				reject.Invoke(errorConstructor.New(fmt.Errorf("Error, Target int parse fail:%w", err).Error()))
+
+			}
+			// fmt.Println("We're being asked to target:", target)
+			// fmt.Println("Our JASON input is:", i[1].String())
+			inputValues, err := jsonToArrayInt(inputsS)
+			if err != nil {
+				reject.Invoke(errorConstructor.New(fmt.Errorf("Error, input values int parse fail:%w", err).Error()))
+			}
+			// fmt.Println("We have the inputs:", inputValues)
+			ra := runCountdown(target, inputValues)
+
+			resolve.Invoke(map[string]interface{}{
+				"error":     err,
+				"countdown": string(ra),
+			})
+
+		}(targetS, inputS)
+
+		// The handler of a Promise doesn't return any value
+		return nil
+	})
+
+	// Create and return the Promise object
+	promiseConstructor := js.Global().Get("Promise")
+	return promiseConstructor.New(handler)
+}
+
 func boggleRun(this js.Value, i []js.Value) interface{} {
-	data, err := wordlist.Asset("data/wordlist.txt")
+	res, err := boggleRunner(i[0].String())
 	if err != nil {
 		return map[string]interface{}{
 			"error": err,
 		}
 	}
-	ra, err := toBoggleArray(i[0])
+	return map[string]interface{}{
+		"error":  err,
+		"boggle": string(res),
+	}
+}
+func boggleRunner(jsonIn string) (string, error) {
+	data, err := wordlist.Asset("data/wordlist.txt")
 	if err != nil {
-		return map[string]interface{}{
-			"error": err,
-		}
+		return "", err
+	}
+	ra, err := toBoggleArray(jsonIn)
+	if err != nil {
+		return "", err
 	}
 
 	dic := boggle.NewDictMap([]string{})
@@ -292,21 +376,16 @@ func boggleRun(this js.Value, i []js.Value) interface{} {
 	sort.Sort(sort.Reverse(byLength(sortedResult)))
 	log.Println(sortedResult)
 	tmp, err := json.Marshal(sortedResult)
-	if err != nil {
-		return map[string]interface{}{
-			"error": err,
-		}
-	}
-	return map[string]interface{}{
-		"error":  err,
-		"boggle": string(tmp),
-	}
+	return string(tmp), err
+
 }
 func registerCallbacks() {
 	js.Global().Set("anagram", js.FuncOf(anagram))
 	js.Global().Set("boggleRun", js.FuncOf(boggleRun))
-	js.Global().Set("countdown", js.FuncOf(countdown))
+	//js.Global().Set("countdown", js.FuncOf(countdown))
+	js.Global().Set("countdownPromise", js.FuncOf(countdownPromise))
 	js.Global().Set("sudoku", js.FuncOf(sudoku))
+	js.Global().Set("bogglePromise", js.FuncOf(bogglePromise))
 }
 
 func main() {
