@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"syscall/js"
 
@@ -218,22 +217,9 @@ func runSudoku(input [][]int) (output [][]int, err error) {
 	return
 }
 
-type byLength []string
-
-func (s byLength) Len() int {
-	return len(s)
-}
-func (s byLength) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-func (s byLength) Less(i, j int) bool {
-	return len(s[i]) < len(s[j])
-}
-
-// FIXME rename i
-func toBoggleArray(i string) ([][]rune, error) {
+func toBoggleArray(input string) ([][]rune, error) {
 	var inputValues [][]string
-	err := json.Unmarshal([]byte(i), &inputValues)
+	err := json.Unmarshal([]byte(input), &inputValues)
 	if err != nil {
 		return nil, err
 	}
@@ -306,8 +292,7 @@ func countdownPromise(this js.Value, argsOuter []js.Value) interface{} {
 				reject.Invoke(errorConstructor.New(fmt.Errorf("Error, Target int parse fail:%w", err).Error()))
 
 			}
-			// fmt.Println("We're being asked to target:", target)
-			// fmt.Println("Our JASON input is:", i[1].String())
+
 			inputValues, err := jsonToArrayInt(inputsS)
 			if err != nil {
 				reject.Invoke(errorConstructor.New(fmt.Errorf("Error, input values int parse fail:%w", err).Error()))
@@ -344,11 +329,11 @@ func boggleRun(this js.Value, i []js.Value) interface{} {
 	}
 }
 func boggleRunner(jsonIn string) (string, error) {
-	data, err := wordlist.Asset("data/wordlist.txt")
+	ra, err := toBoggleArray(jsonIn)
 	if err != nil {
 		return "", err
 	}
-	ra, err := toBoggleArray(jsonIn)
+	data, err := wordlist.Asset("data/wordlist.txt")
 	if err != nil {
 		return "", err
 	}
@@ -356,24 +341,7 @@ func boggleRunner(jsonIn string) (string, error) {
 	dic := boggle.NewDictMap([]string{})
 	dic.PopulateFromBa(data)
 
-	wrdsFound := make(map[string]struct{})
-	pz := dic.NewPuzzle(4, ra)
-	wrkFunc := func(wrd string) {
-		wrdsFound[wrd] = struct{}{}
-	}
-
-	pz.StartWorker(wrkFunc)
-	pz.RunWalk()
-	pz.Shutdown()
-	wrdCnt := len(wrdsFound)
-	log.Println("Word Count:", wrdCnt)
-	sortedResult := make([]string, wrdCnt)
-	j := 0
-	for wrd := range wrdsFound {
-		sortedResult[j] = wrd
-		j++
-	}
-	sort.Sort(sort.Reverse(byLength(sortedResult)))
+	sortedResult := boggle.NewPuzzleSolve(ra, dic)
 	log.Println(sortedResult)
 	tmp, err := json.Marshal(sortedResult)
 	return string(tmp), err
@@ -381,7 +349,7 @@ func boggleRunner(jsonIn string) (string, error) {
 }
 func registerCallbacks() {
 	js.Global().Set("anagram", js.FuncOf(anagram))
-	js.Global().Set("boggleRun", js.FuncOf(boggleRun))
+	//js.Global().Set("boggleRun", js.FuncOf(boggleRun))
 	//js.Global().Set("countdown", js.FuncOf(countdown))
 	js.Global().Set("countdownPromise", js.FuncOf(countdownPromise))
 	js.Global().Set("sudoku", js.FuncOf(sudoku))
