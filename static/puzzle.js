@@ -96,24 +96,45 @@ function calculateCountdown(e){
 
     // We want the first (and only) row of the table
     countdownBtn.text = "Calculating..."
-    let countdownPromise = runCountdownCalc();
-    countdownBtn.text = "Calculated"
+    runCountdownCalc();
 
     setTimeout(() =>{
+        // Reset the button text a little while after we're done
         countdownBtn.text = "Calculate"
     }, 5000);
 
     e.preventDefault();
 }
-
+function inputTableValidate(inputTable) {
+    if (inputTable.length != 6) {
+        throw `Not enough numbers supplied, found:${inputTable.length}`
+    }
+    inputTable.forEach(v => {
+        if (v<=0) {
+            throw `Input ${v} is too small`
+        }
+        if (v>100){
+            throw `Input ${v} is too large`
+        }
+    })
+}
 async function runCountdownCalc(){
-    let inputTable = inputTableRetrieve(countdownTable); 
+    let inputTable = inputTableRetrieve(countdownTable);
+    try {
+        inputTableValidate(inputTable);
+    } catch (err){
+        countdownBtn.text = `Error::${err}`
+        return
+    }
     try{
         returnStruct = await countdownPromise(countdownTarget.value, JSON.stringify(inputTable[0]));
     } catch (err) {
+        // These are an internal error - don't show the user
         console.error('Caught exception', err)
         return
     }
+    countdownBtn.text = "Calculated"
+
     let rs = returnStruct["countdown"]
 
     populateTab(roomResultList, [[rs]]);
@@ -127,7 +148,7 @@ function calculateSudoku(e){
     returnStruct = sudoku(inputTableJson);
     console.log(returnStruct);
     if (returnStruct["error"] != null) {
-        console.log(`Got an error ${returnStruct["error"]}`)
+        console.error(`Got an error ${returnStruct["error"]}`)
         return;
     }
     resultArray = JSON.parse(returnStruct["sudoku"]);
@@ -137,12 +158,12 @@ function calculateSudoku(e){
 
 function calculateBoggle(e) {
     inputTable = inputTableRetrieve(boggleTable)
-    inputTable = [
-        ["a", "b", "d", "e"],
-        ["b", "b", "g", "b"],
-        ["c", "f", "d", "a"],
-        ["a", "d", "w", "e"],
-    ];
+    // inputTable = [
+    //     ["a", "b", "d", "e"],
+    //     ["b", "b", "g", "b"],
+    //     ["c", "f", "d", "a"],
+    //     ["a", "d", "w", "e"],
+    // ];
     inputTableJson = JSON.stringify(inputTable);
     calculateBoggleRunner(inputTableJson)
     e.preventDefault();
