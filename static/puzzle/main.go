@@ -98,7 +98,6 @@ func runCountdown(target int, sources []int) string {
 	foundValues := cntslv.NewNumMap()
 	foundValues.SelfTest = false
 	foundValues.UseMult = true
-	foundValues.PermuteMode = cntslv.LonMap
 	foundValues.SeekShort = false // TBD make this controllable
 
 	fmt.Println("Starting permute")
@@ -107,7 +106,6 @@ func runCountdown(target int, sources []int) string {
 		//fmt.Println("Proof Received", v)
 		// Here we get the proofs as they are found
 	}
-	//fmt.Println("Permute Complete", proof_list)
 	// Here we return the "best" solution
 	return foundValues.GetProof(target)
 }
