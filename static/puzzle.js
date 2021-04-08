@@ -121,7 +121,7 @@ function inputTableValidate(inputTable) {
 async function runCountdownCalc(){
     let inputTable = inputTableRetrieve(countdownTable);
     try {
-        inputTableValidate(inputTable);
+        inputTableValidate(inputTable[0]);
     } catch (err){
         countdownBtn.text = `Error::${err}`
         return
